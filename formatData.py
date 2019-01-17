@@ -68,7 +68,7 @@ def addFiles():
   df['Artikelgruppe'] = df['Artikelgruppe'].apply(lambda x: str(x).replace('Vollkornbrote', 'Brote'))
   df['Artikelgruppe'] = df['Artikelgruppe'].apply(lambda x: str(x).replace('Vollkornbrot', 'Brote'))
 
-  df.to_csv('./data/dataframe.csv')
+  df.to_csv('./data/dataframe.csv', index=False)
 
 if __name__ == '__main__':
   main()
