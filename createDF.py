@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import sys
+sys.path.append('~/Documents/coding/bbn/produktionAggregation/')
 import pandas as pd
 import calendar
 from pathlib import Path
 import openpyxl
 
-df = pd.read_csv("~/Documents/coding/bbn/produktionAggregation/data/dataframe.csv")
+df = pd.read_csv("/data/dataframe.csv")
 df['Datum'] = pd.to_datetime(df['Datum'])
 df = df.round()
 
