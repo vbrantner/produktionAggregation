@@ -14,32 +14,47 @@ import pickle
 
 def main():
     files18 = [f for f in listdir(Path('./data/18/')) if f.endswith(".xlsx") if isfile(join(Path('./data/18'), f))]
-    with open("savedData.txt", "rb") as fp:
-        imported_files18 = pickle.load(fp)
-    if files18 == imported_files18:
-        print('no new file to add')
+    savedData = Path('savedData.txt') 
+    # create savedData.txt if not exist
+    if savedData.is_file():
+      with open("savedData.txt", "rb") as fp:
+          existing_files18 = pickle.load(fp)
+    else:
+      with open('savedData.txt', 'wb') as fp:
+        pickle.dump([], fp)
+    # check if there are new files to add
+    if files18 == existing_files18:
+        print('There are no new files to add')
     else:
         print("there are files to add...")
-        addFiles()
+        setNewFiles = set(files18)
+        setExistingFiles = set(existing_files18)
+        unmatched = setNewFiles.symmetric_difference(setExistingFiles)
+        print('File with name {} wil be added to the df'.format(unmatched))
+        addFiles(True, list(unmatched)[0])
         saveDF()
         sendMail('v.brantner@brantner.de', 'formatting df', 'formatting df completed')
         with open('savedData.txt', 'wb') as fp:
             pickle.dump(files18, fp)
 
 # rewrite, first check which files already in the df
-def addFiles():
-  first_df = pd.read_excel(Path('./data/16/data_16_10-12.xlsx'))
-  files17 = [f for f in listdir(Path('./data/17/')) if f.endswith(".xlsx") if isfile(join(Path('./data/17'), f))]
-  files18 = [f for f in listdir(Path('./data/18/')) if f.endswith(".xlsx") if isfile(join(Path('./data/18'), f))]
-  
-  df = pd.read_excel(Path('./data/17/'+files17[0]))
-  df2 = pd.read_excel(Path('./data/17/'+files17[1]))
-  df = first_df.append(df)
-  df = df.append(df2)
-
-  for indexFile in range(0, len(files18)):
-    df = df.append(pd.read_excel(Path('./data/18/'+files18[indexFile])))
-    print('added {}'.format(files18[indexFile]))
+def addFiles(existingDF, fileToAdd=""):
+  if existingDF == True:
+    df = pd.read_csv("~/Documents/coding/bbn/produktionAggregation/data/dataframe.csv")
+    print(fileToAdd)
+    dfToAdd = pd.read_excel(Path('./data/18/' + fileToAdd))
+    df = df.append(dfToAdd)
+  else:
+    first_df = pd.read_excel(Path('./data/16/data_16_10-12.xlsx'))
+    files17 = [f for f in listdir(Path('./data/17/')) if f.endswith(".xlsx") if isfile(join(Path('./data/17'), f))]
+    files18 = [f for f in listdir(Path('./data/18/')) if f.endswith(".xlsx") if isfile(join(Path('./data/18'), f))]
+    df = pd.read_excel(Path('./data/17/'+files17[0]))
+    df2 = pd.read_excel(Path('./data/17/'+files17[1]))
+    df = first_df.append(df)
+    df = df.append(df2)
+    for indexFile in range(0, len(files18)):
+      df = df.append(pd.read_excel(Path('./data/18/'+files18[indexFile])))
+      print('added {}'.format(files18[indexFile]))
 
   df = df.rename(index=str, columns={
     'Kunde.Nummer':'KundenNr',
@@ -50,6 +65,7 @@ def addFiles():
     'VK-Menge': 'VerkaufteMenge',
     'Ges.-Menge': 'GesamteMenge',
     'Diff.': 'Differenz',
+    'Kor.' : 'Korrektur',
     'LVKP 1 Brutto': 'LVKPBrutto',
     'Back-Gewicht': 'BackGewicht'})
 
